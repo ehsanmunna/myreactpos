@@ -8,6 +8,7 @@ import {Link} from "react-router-dom";
 import Button from '@material-ui/core/Button';
 import auth from "../Service/auth";
 import {withRouter} from 'react-router-dom';
+import { CircularProgress } from '@material-ui/core';
 
 
 const style = {
@@ -21,12 +22,16 @@ class LoginForm extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      props: props,
+      //props: props,
+      loading: false,
       formValue: {
         userName: '',
         password: ''
       }
+      , messages: null
     }
+    //this.handleChange = this.handleChange.bind(this);
+    //this.handleSubmit = this.handleSubmit.bind(this);
   }
   handelChange = (_newValue) => {
     var item = Object.assign({}, this.state.formValue, _newValue);
@@ -34,12 +39,18 @@ class LoginForm extends React.Component {
     this.setState({formValue: item});
   }
 
-  Login = () => {
-    console.log(this.state.props)
-    auth.logIn(this.state.formValue, () => {
-      const path = '/dashboard';
-      this.props.history.push(path);
-    });
+  handleSubmit = (event) => {
+    this.setState({loading: true});
+    auth.logIn(this.state.formValue
+      , () => {
+        this.setState({loading: false});
+        const path = '/dashboard';
+        this.props.history.push(path);
+      }, (e)=>{ 
+        this.setState({loading: false, messages: e.message});
+      }
+    );
+    event.preventDefault();
   }
 
   render(){
@@ -47,7 +58,7 @@ class LoginForm extends React.Component {
           <div>
               <Box display="flex" alignItems="center" flexDirection="column">
                 <h2>Login to your account</h2>
-                <form noValidate autoComplete="off">
+                <form noValidate autoComplete="off" onSubmit={this.handleSubmit}>
                   <Box display="flex" alignItems="center" flexDirection="column">
                       <Box display="flex" alignItems="center" flexDirection="column">
                         <Button style={style.contentSpacing} variant="contained">Continue With Facebook</Button>
@@ -71,10 +82,14 @@ class LoginForm extends React.Component {
                       {/* <pre>
                       {this.state.formValue}
                       </pre> */}
-
-                      <div style={{marginTop: '25px'}}>
-                        <Button variant="contained" onClick={ () => this.Login()}>
-                          Continue
+                      <div style={{color: 'red', padding: 5}}>{this.state.messages}</div>
+                      <div style={{ flex: 1, flexDirection: 'row', marginTop: '25px'}}>
+                        
+                        {/* <ServerMessage message={this.props.message} /> */}
+                        <Button type="submit" variant="contained">
+                          {
+                            this.state.loading ? <span><CircularProgress size={20} /> Checking...</span> : <span>Continue</span>
+                          }
                         </Button>
                       </div>
 

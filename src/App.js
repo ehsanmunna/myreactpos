@@ -27,3 +27,7 @@ function App() {
 }
 
 export default App;
+// export default withRouter(App);
+// export default withRouter(connect(
+//   mapStateToProps,
+// )(App))

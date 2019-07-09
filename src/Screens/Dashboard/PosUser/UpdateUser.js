@@ -5,11 +5,9 @@ import Input from '@material-ui/core/Input';
 import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
-// import Box from '@material-ui/core/Box';
-// import Button from '@material-ui/core/Button';
-// import auth from "../Service/auth";
-import axios from "axios";
-import api from "../../Service/apiUrl";
+import auth from '../../../Service/auth';
+import Notify from '../../../Service/Notify';
+import JsonNullToString from '../../../Service/JsonNullHandle';
 
 // function cloneObject(obj) {
 //     var clone = {};
@@ -22,42 +20,44 @@ import api from "../../Service/apiUrl";
 //     return clone;
 // }
 
-class UserCreate extends React.Component {
+class UserUpdate extends React.Component {
 
     state = {
         formValue: {
+        // userId: '',
+        // personId: '',
             firstName: '',
             lastName: '',
-            userName: '',
             mobile: '',
             email: '',
-            address: '',
-            password: ''
+            address: ''
         }
+        , DBValue: null
     }
 
-    CreateUser = () => {
+    componentDidMount(){
+        auth.GetUser(this.props.match.params.id)
+            .then(response=>{
+                const res = JsonNullToString.ToString(response.data);
+                this.setState({DBValue: res});
+                this.setState({formValue: res.person});
+            });
+    }
+
+    UpdateUser = () => {
         var sData = this.state.formValue;
-        var userData = {
-            firstName: sData.firstName,
-            lastName: sData.lastName,
-            userName: sData.userName,
-            person: {
-                mobile: sData.mobile,
-                email: sData.email,
-                address: sData.address
-            },
-            password: sData.password
-        }
-        axios.post(api.apiUrl + "PosUser", userData)
+        let dbData = this.state.DBValue;
+        dbData.person = sData;
+        auth.UpdateUser(dbData.userId, dbData)
             .then((res)=>{
-                alert('successfully created')
+                Notify.Alert('successfully updated');
             })
-        console.log(userData)
+        // console.log(this.state.DBValue)
     }
 
     handelChange = (_newValue) => {
-        var item = {...this.state.formValue, ..._newValue};
+        var item = Object.assign({}, this.state.formValue, _newValue);
+        //{...this.state.formValue, ..._newValue};
         this.setState({formValue: item});
       }
 
@@ -72,31 +72,21 @@ class UserCreate extends React.Component {
                         <Box display="flex" alignItems="center" flexDirection="column">
                             <FormControl>
                                 <InputLabel htmlFor="user-first-name">First Name</InputLabel>
-                                <Input onChange={(e)=> this.handelChange({firstName: e.target.value})} id="user-first-name" aria-describedby="my-helper-text" />
+                                <Input onChange={(e)=> this.handelChange({firstName: e.target.value})} value={this.state.formValue.firstName} id="user-first-name" aria-describedby="my-helper-text" />
                             </FormControl>
                             <FormControl>
                                 <InputLabel htmlFor="user-last-name">Last Name</InputLabel>
-                                <Input onChange={(e)=> this.handelChange({lastName: e.target.value})} id="user-last-name" aria-describedby="my-helper-text" />
-                            </FormControl>
-                            <FormControl>
-                                <InputLabel htmlFor="user-user-name">User Name</InputLabel>
-                                <Input onChange={(e)=> this.handelChange({userName: e.target.value})} id="user-user-name" aria-describedby="my-helper-text" />
+                                <Input onChange={(e)=> this.handelChange({lastName: e.target.value})} value={this.state.formValue.lastName} id="user-last-name" aria-describedby="my-helper-text" />
                             </FormControl>
                             <FormControl>
                                 <InputLabel htmlFor="user-mobile">Mobile</InputLabel>
-                                <Input onChange={(e)=> this.handelChange({mobile: e.target.value})} id="user-mobile" aria-describedby="my-helper-text" />
+                                <Input onChange={(e)=> this.handelChange({mobile: e.target.value})} value={this.state.formValue.mobile} id="user-mobile" aria-describedby="my-helper-text" />
                             </FormControl>
                             
                             <FormControl>
                                 <InputLabel htmlFor="user-email">Email</InputLabel>
-                                <Input onChange={(e)=> this.handelChange({email: e.target.value})} id="user-email" aria-describedby="my-helper-text" />
+                                <Input onChange={(e)=> this.handelChange({email: e.target.value})} value={this.state.formValue.email} id="user-email" aria-describedby="my-helper-text" />
                             </FormControl>
-                
-                            <FormControl>
-                                <InputLabel htmlFor="user-password">Password</InputLabel>
-                                <Input type="password" onChange={(e)=> this.handelChange({password: e.target.value})} id="user-password" />
-                            </FormControl>
-                
                             
                             <FormControl>
                                 <InputLabel htmlFor="user-mobile"></InputLabel>
@@ -107,11 +97,12 @@ class UserCreate extends React.Component {
                                     rows="4"
                                     onChange={(e)=> this.handelChange({address: e.target.value})}
                                     margin="normal"
+                                    value={this.state.formValue.address}
                                 />
                             </FormControl>
                         </Box>
                         <div style={{marginTop: '25px'}}>
-                            <Button variant="contained" onClick={ () => this.CreateUser()}>
+                            <Button variant="contained" onClick={ () => this.UpdateUser()}>
                                 Submit
                             </Button>
                         </div>
@@ -124,4 +115,4 @@ class UserCreate extends React.Component {
   
 }
 
-export default UserCreate;
+export default UserUpdate;

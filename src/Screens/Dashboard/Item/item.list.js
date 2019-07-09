@@ -1,42 +1,45 @@
 import React from "react";
-import Product from "../../../Service/Product";
 import { Link } from "react-router-dom";
 import { Table, TableHead, TableRow, TableCell, TableBody, AppBar, Toolbar, Typography, Button, IconButton } from "@material-ui/core";
 
 import Icon from '@material-ui/core/Icon';
+import ItemService from "../../../Service/ItemService";
 
 
-class ProductListPage extends React.Component {
+class ItemListPage extends React.Component {
     state = {
         data: []
     }
     componentDidMount(){
-        this.GetProducts();
+        this.GetItems();
     }
 
-    GetProducts(){
-        Product.Get()
+    GetItems(){
+        ItemService.Get()
             .then(res => {
                 this.setState({data: res.data});
             })
     }
 
     Delete(id){
-        Product.Delete(id, ()=>{
-            this.GetProducts();
+        ItemService.Delete(id, ()=>{
+            this.GetItems();
         })
     }
 
     render(){
         return (
             <div>
+                {/* <div>
+                    Product Navigation <Link to="/dashboard/productcreate">Add new Product</Link>
+                </div> */}
                 <AppBar position="sticky" color="default">
                     <Toolbar>
                         <Typography style={{flexGrow: 1}} variant="h6" color="inherit">
-                            Product
+                            Items
                         </Typography>
                         <Button color="inherit" onClick={
-                            () => { this.props.history.push('/dashboard/productcreate') }
+                            () => { this.props.history.push('/dashboard/itemcreate') }
                         }>
                             <Icon>add</Icon>
                         </Button>
@@ -85,4 +88,4 @@ class ProductListPage extends React.Component {
     }
 }
 
-export default ProductListPage; 
+export default ItemListPage; 
